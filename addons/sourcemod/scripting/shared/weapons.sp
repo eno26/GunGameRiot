@@ -243,7 +243,7 @@ int Weapons_GiveItem(int client, int index, bool &use=false, bool &found=false)
 
 	int length = WeaponList.Length;
 
-	if(index > 0 && index <= length)
+	if(index > -1 && index < length)
 	{
 		WeaponList.GetArray(index, info);
 		if(info.Classname[0])
@@ -550,8 +550,6 @@ void Weapons_ResetRound()
 
 	for(int i; i<length; i++)
 	{
-		if(i == 0)
-			continue;
 		//Pick up All weapons
 		WeaponsPicking[WeaponsPick++] = i;
 	}
@@ -560,7 +558,7 @@ void Weapons_ResetRound()
 	
 	int MaxWeapons = Cvar_GGR_WeaponsTillWin.IntValue;
 	if(MaxWeapons > length)
-		Cvar_GGR_WeaponsTillWin.IntValue = length -1;
+		Cvar_GGR_WeaponsTillWin.IntValue = length;
 	WeaponInfo Weplist;
 	ItemInfo info;
 	for(int i; i<MaxWeapons; i++)
@@ -584,6 +582,9 @@ public int SortScoresWeapons(int iIndex1, int iIndex2, Handle hMap, Handle hHand
 
 void GiveClientWeapon(int client, int Upgrade = 0)
 {
+	if(!WeaponListRound)
+		return;
+
 	int GiveWeapon = ClientAtWhatScore[client];
 	GiveWeapon += Upgrade;
 	GiveWeapon++;
@@ -591,9 +592,8 @@ void GiveClientWeapon(int client, int Upgrade = 0)
 	{
 		//epic win
 	}
-
 	WeaponInfo Weplist;
-	WeaponList.GetArray(GiveWeapon, Weplist);
+	WeaponListRound.GetArray(GiveWeapon, Weplist);
 	
 	Weapons_GiveItem(client, Weplist.InternalWeaponID);
 	Manual_Impulse_101(client, ReturnEntityMaxHealth(client));

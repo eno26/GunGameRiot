@@ -74,12 +74,24 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	
 	Core_DoTickrateChanges();
 	DHook_Setup();
 	SDKCall_Setup();
 	Events_PluginStart();
 	SDKHook_PluginStart();
 	ConVar_PluginStart();
+	
+	int entity = -1;
+	while((entity = FindEntityByClassname(entity, "*")) != -1)
+	{
+		//if (IsValidEntity(i))
+		{
+			static char strClassname[64];
+			GetEntityClassname(entity, strClassname, sizeof(strClassname));
+			OnEntityCreated(entity,strClassname);
+		}
+	}
 	RegAdminCmd("sm_give_gun", Command_ForceGiveGunName, ADMFLAG_ROOT, "Give a gun to a person");
 }
 
@@ -105,6 +117,7 @@ public void OnConfigsExecuted()
 	ConVar_Enable();
 	Configs_ConfigsExecuted();
 	Weapons_ConfigsExecuted();
+	Weapons_ResetRound();
 	for(int client=1; client<=MaxClients; client++)
 	{
 		if(IsClientInGame(client))
