@@ -68,6 +68,7 @@ Function EntityFuncAttack2[MAXENTITIES];
 Function EntityFuncAttack3[MAXENTITIES];
 Function EntityFuncReload4[MAXENTITIES];
 Function EntityFuncReloadCreate[MAXENTITIES];
+Function EntityFuncRemove[MAXENTITIES];
 Function EntityFuncJarate[MAXENTITIES];
 TFClassType CurrentClass[MAXPLAYERS]={TFClass_Scout, ...};
 TFClassType WeaponClass[MAXPLAYERS]={TFClass_Scout, ...};

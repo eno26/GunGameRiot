@@ -33,6 +33,7 @@ enum struct ItemInfo
 	Function FuncAttack3;
 	Function FuncReload4;
 	Function FuncWeaponCreated;
+	Function FuncWeaponRemoved;
 	Function FuncJarate;
 
 	void Self(ItemInfo info)
@@ -111,6 +112,10 @@ enum struct ItemInfo
 		Format(buffer, sizeof(buffer), "%sfunc_weapon_created", prefix);
 		kv.GetString(buffer, buffer, sizeof(buffer));
 		this.FuncWeaponCreated = GetFunctionByName(null, buffer);
+		
+		Format(buffer, sizeof(buffer), "%sfunc_weapon_removed", prefix);
+		kv.GetString(buffer, buffer, sizeof(buffer));
+		this.FuncWeaponRemoved = GetFunctionByName(null, buffer);
 
 		Format(buffer, sizeof(buffer), "%sweapon_hud_extra", prefix);
 		kv.GetString(buffer, this.WeaponHudExtra, sizeof(buffer));
@@ -327,6 +332,7 @@ int Weapons_GiveItem(int client, int index, bool &use=false, bool &found=false)
 				EntityFuncAttack3[entity] = info.FuncAttack3;
 				EntityFuncReload4[entity]  = info.FuncReload4;
 				EntityFuncReloadCreate [entity]  = info.FuncWeaponCreated;
+				EntityFuncRemove[entity] = info.FuncWeaponRemoved;
 				EntityFuncJarate[entity] = info.FuncJarate;
 				i_WeaponVMTExtraSetting[entity] 			= info.WeaponVMTExtraSetting;
 
@@ -654,6 +660,19 @@ void GiveClientWeapon(int client, int Upgrade = 0)
 
 	if(Upgrade)
 	{
+		int activeWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+		if (activeWeapon != -1)
+		{
+			Function func = EntityFuncRemove[activeWeapon];
+			if(func && func!=INVALID_FUNCTION)
+			{
+				Call_StartFunction(null, func);
+				Call_PushCell(client);
+				Call_PushCell(activeWeapon);
+				Call_Finish();
+			}
+		}
+		
 		while((entity = FindEntityByClassname(entity, "tf_projectile_*")) != -1)
 		{
 			if(GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity") == client)

@@ -73,6 +73,7 @@
 #include "weapons/weapon_ant_jar.sp"
 #include "weapons/weapon_builder.sp"
 #include "weapons/weapon_wand_gravaton.sp"
+#include "weapons/weapon_vehicular_manslaughter.sp"
 
 public Plugin myinfo =
 {
@@ -160,6 +161,7 @@ public void OnMapStart()
 	WandStocks_Map_Precache();
 	Wand_Map_Precache();
 	Gravaton_Wand_MapStart();
+	VehicularManslaughter_Precache();
 }
 
 public void OnConfigsExecuted()

@@ -30,7 +30,8 @@ stock void SDKHook_HookClient(int client)
 	SDKHook(client, SDKHook_WeaponSwitchPost, OnWeaponSwitchPost);
 	SDKUnhook(client, SDKHook_TraceAttack, Player_TraceAttack);
 	SDKHook(client, SDKHook_TraceAttack, Player_TraceAttack);
-
+	SDKUnhook(client, SDKHook_OnTakeDamage, Player_OnTakeDamage);
+	SDKHook(client, SDKHook_OnTakeDamage, Player_OnTakeDamage);
 }
 
 public void OnPostThink(int client)
@@ -140,6 +141,17 @@ public Action Player_TraceAttack(int victim, int& attacker, int& inflictor, floa
 		}
 	}
 	return Plugin_Changed;
+}
+
+public Action Player_OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	if (damagecustom == TF_CUSTOM_KART)
+	{
+		damage *= 3.0;
+		return Plugin_Changed;
+	}
+	
+	return Plugin_Continue;
 }
 
 static Action OnPlayerJarated(UserMsg msg_id, BfRead bf, const int[] players, int playersNum, bool reliable, bool init)
