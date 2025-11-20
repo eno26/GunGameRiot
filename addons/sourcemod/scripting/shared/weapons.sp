@@ -636,6 +636,7 @@ void GiveClientWeapon(int client, int Upgrade = 0)
 		SetEntProp(client, Prop_Send, "m_bGlowEnabled", true);
 		if(Upgrade >= 1)
 		{
+			EmitSoundToAll(SOUND_FINALLEVEL, _, SNDCHAN_STATIC, SNDLEVEL_NONE);
 			TF2_AddCondition(client, TFCond_MarkedForDeath, 9999.9);
 			CPrintToChatAll("%s %N is about to win!",GGR_PREFIX, client);
 		}

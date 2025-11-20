@@ -48,6 +48,8 @@
 #define HIDEHUD_TARGET_ID		( 1<<16 )	
 
 #define SOUND_LEVELUP "gungame_riot/levelup.mp3"
+#define SOUND_FINALLEVEL "ui/duel_challenge_accepted_with_restriction.wav"
+
 
 #include "global_arrays.sp"
 #include "stocks_override.sp"
@@ -119,6 +121,8 @@ public void OnMapStart()
 	PrecacheSound("quake/standard/headshot.mp3");
 	PrecacheSound("ambient/explosions/explode_3.wav");
 	PrecacheSound(SOUND_LEVELUP);
+	PrecacheSound(SOUND_FINALLEVEL);
+	
 	
 	AddFileToDownloadsTable("sound/zombiesurvival/headshot1.wav");
 	AddFileToDownloadsTable("sound/zombiesurvival/headshot2.wav");
