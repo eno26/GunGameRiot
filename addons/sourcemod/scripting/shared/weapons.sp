@@ -505,19 +505,17 @@ void Weapons_ApplyAttribs(int client)
 	
 	StringMap map = new StringMap();
 
-
+	float ScalingDo = GetEntPropFloat(client, Prop_Send, "m_flModelScale");
 	float HealthDoLogic = RemoveExtraHealth(ClassForStats, 0.1);
 	map.SetValue("125", HealthDoLogic);
 	map.SetValue("26", (200.0));		// Health
+	map.SetValue("326", ScalingDo);
+	map.SetValue("252", ScalingDo);
 
-	map.SetValue("343", 1.0); //sentry attackspeed fix
 	map.SetValue("526", 1.0);//
 	map.SetValue("4049", 1.0);// Elemental Res
 
-	map.SetValue("442", 1.0);	// Move Speed
 	map.SetValue("49", 1);		// no doublejumps
-
-	map.SetValue("740", 0.0);	// No Healing from mediguns, allow healing from pickups
 	if(f_PreventMovementClient[client] > GetGameTime())
 	{
 		map.SetValue("819", 1.0);
@@ -531,7 +529,7 @@ void Weapons_ApplyAttribs(int client)
 	{
 		float MovementSpeed = 400.0;
 		
-		map.SetValue("107", RemoveExtraSpeed(ClassForStats, MovementSpeed));		// Move Speed
+		map.SetValue("107", ScalingDo * RemoveExtraSpeed(ClassForStats, MovementSpeed));		// Move Speed
 	}
 
 
