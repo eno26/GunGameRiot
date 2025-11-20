@@ -60,6 +60,7 @@ float f_WandDamage[MAXENTITIES]; //
 int i_WandWeapon[MAXENTITIES]; //
 int i_WandParticle[MAXENTITIES]; //Only one allowed, dont use more. ever. ever ever. lag max otherwise.
 int i_WandOwner[MAXENTITIES]; //				//785
+int i_WeaponKilledWith[MAXPLAYERS];
 
 int StoreWeapon[MAXENTITIES];
 
@@ -70,6 +71,7 @@ Function EntityFuncReload4[MAXENTITIES];
 Function EntityFuncReloadCreate[MAXENTITIES];
 Function EntityFuncRemove[MAXENTITIES];
 Function EntityFuncJarate[MAXENTITIES];
+Function EntityFuncTakeDamage[MAXENTITIES];
 TFClassType CurrentClass[MAXPLAYERS]={TFClass_Scout, ...};
 TFClassType WeaponClass[MAXPLAYERS]={TFClass_Scout, ...};
 

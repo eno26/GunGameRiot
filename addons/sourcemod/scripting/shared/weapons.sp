@@ -35,6 +35,7 @@ enum struct ItemInfo
 	Function FuncWeaponCreated;
 	Function FuncWeaponRemoved;
 	Function FuncJarate;
+	Function FuncTakeDamage;
 
 	void Self(ItemInfo info)
 	{
@@ -123,6 +124,10 @@ enum struct ItemInfo
 		Format(buffer, sizeof(buffer), "%sfunc_jarate", prefix);
 		kv.GetString(buffer, buffer, sizeof(buffer));
 		this.FuncJarate = GetFunctionByName(null, buffer);
+
+		Format(buffer, sizeof(buffer), "%sfunc_takedamage", prefix);
+		kv.GetString(buffer, buffer, sizeof(buffer));
+		this.FuncTakeDamage = GetFunctionByName(null, buffer);
 		
 		static char buffers[64][16];
 		Format(buffer, sizeof(buffer), "%sattributes", prefix);
@@ -176,7 +181,7 @@ enum struct ItemInfo
 	}
 
 */
-static ArrayList WeaponList;
+ArrayList WeaponList;
 void Weapons_ConfigsExecuted()
 {
 	if(WeaponList)
@@ -334,6 +339,7 @@ int Weapons_GiveItem(int client, int index, bool &use=false, bool &found=false)
 				EntityFuncReloadCreate [entity]  = info.FuncWeaponCreated;
 				EntityFuncRemove[entity] = info.FuncWeaponRemoved;
 				EntityFuncJarate[entity] = info.FuncJarate;
+				EntityFuncTakeDamage[entity] = info.FuncTakeDamage;
 				i_WeaponVMTExtraSetting[entity] 			= info.WeaponVMTExtraSetting;
 
 				if (info.Reload_ModeForce == 1)
@@ -387,7 +393,7 @@ int Weapons_GiveItem(int client, int index, bool &use=false, bool &found=false)
 
 	ViewChange_PlayerModel(client);
 	ViewChange_Update(client);
-
+	
 	Event event = CreateEvent("localplayer_pickup_weapon", true);
 	event.FireToClient(client);
 	event.Cancel();
@@ -577,8 +583,11 @@ void Weapons_ResetRound()
 	int WeaponsPick;
 	int[] WeaponsPicking = new int[length];
 
+	WeaponInfo Weplist;
+	ItemInfo info;
 	for(int i; i<length; i++)
 	{
+		WeaponList.GetArray(i, info);
 		//Pick up All weapons
 		WeaponsPicking[WeaponsPick++] = i;
 	}
@@ -592,13 +601,16 @@ void Weapons_ResetRound()
 		MaxWeapons = length;
 	}
 	
-	WeaponInfo Weplist;
-	ItemInfo info;
 	for(int i; i<MaxWeapons; i++)
 	{
 		Weplist.InternalWeaponID = WeaponsPicking[i];
 		WeaponList.GetArray(WeaponsPicking[i], info);
-		Weplist.ScoreSave = info.WeaponScore;
+		if(info.WeaponScore > 1.0)
+		{
+			MaxWeapons++;
+			continue;
+		}
+		Weplist.ScoreSave = (info.WeaponScore + GetRandomFloat(-0.05, 0.05));
 		
 		WeaponListRound.PushArray(Weplist);
 	}
@@ -646,10 +658,10 @@ void GiveClientWeapon(int client, int Upgrade = 0)
 	if(GiveWeapon + 1 >= Cvar_GGR_WeaponsTillWin.IntValue)
 	{
 		SetEntProp(client, Prop_Send, "m_bGlowEnabled", true);
+		TF2_AddCondition(client, TFCond_MarkedForDeath, 9999.9);
 		if(Upgrade >= 1)
 		{
 			EmitSoundToAll(SOUND_FINALLEVEL, _, SNDCHAN_STATIC, SNDLEVEL_NONE);
-			TF2_AddCondition(client, TFCond_MarkedForDeath, 9999.9);
 			CPrintToChatAll("%s %N is about to win!",GGR_PREFIX, client);
 		}
 	}
@@ -690,9 +702,14 @@ void GiveClientWeapon(int client, int Upgrade = 0)
 
 	WeaponInfo Weplist;
 	WeaponListRound.GetArray(GiveWeapon, Weplist);
-	
 	RemoveAllWeapons(client);
 	int weapon = Weapons_GiveItem(client, Weplist.InternalWeaponID);
+	char buffer[36];
+	GetEntityClassname(weapon, buffer, sizeof(buffer));
+	if(TF2_GetClassnameSlot(buffer, weapon) != 2) //no melee  weapon,give deranker
+	{
+		Weapons_GiveSpecificItem(client, "The Great Ragebaiter");
+	}
 	Manual_Impulse_101(client, ReturnEntityMaxHealth(client));
 	SDKCall_GiveCorrectAmmoCount(client);
 	RequestFrames(GiveHealth, 1, GetClientUserId(client));
