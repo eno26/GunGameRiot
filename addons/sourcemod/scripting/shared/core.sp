@@ -144,10 +144,10 @@ public void OnMapStart()
 	AddFileToDownloadsTable("models/zombie_riot/weapons/ruina_models_2_5.dx90.vtx");
 	AddFileToDownloadsTable("models/zombie_riot/weapons/ruina_models_2_5.mdl");
 	AddFileToDownloadsTable("models/zombie_riot/weapons/ruina_models_2_5.vvd");
-	AddFileToDownloadsTable("models/zombie_riot/weapons/c_soldier_arms.dx80.vtx");
-	AddFileToDownloadsTable("models/zombie_riot/weapons/c_soldier_arms.dx90.vtx");
-	AddFileToDownloadsTable("models/zombie_riot/weapons/c_soldier_arms.mdl");
-	AddFileToDownloadsTable("models/zombie_riot/weapons/c_soldier_arms.vvd");
+	AddFileToDownloadsTable("models/zombie_riot/soldier_hands/c_soldier_arms.dx80.vtx");
+	AddFileToDownloadsTable("models/zombie_riot/soldier_hands/c_soldier_arms.dx90.vtx");
+	AddFileToDownloadsTable("models/zombie_riot/soldier_hands/c_soldier_arms.mdl");
+	AddFileToDownloadsTable("models/zombie_riot/soldier_hands/c_soldier_arms.vvd");
 	AddFileToDownloadsTable("materials/models/weapons/custom_weaponry/grey.vtf");
 	AddFileToDownloadsTable("materials/models/weapons/custom_weaponry/grey.vmt");
 	AddFileToDownloadsTable("materials/models/weapons/custom_weaponry/blue.vmt");

@@ -35,8 +35,9 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 		if (assister && IsValidClient(assister) && assister != attacker && assister != victim && CanClientGetAssistCredit(assister))
 		{
 			ClientAssistsThisLevel[assister]++;
-			if (ClientAssistsThisLevel[assister] >= 2)
+			if (ClientAssistsThisLevel[assister] == 2)
 			{
+				ClientKillsThisFrame[assister]++;
 				RequestFrame(DelayFrame_RankPlayerUp, GetClientUserId(assister));
 			}
 		}
