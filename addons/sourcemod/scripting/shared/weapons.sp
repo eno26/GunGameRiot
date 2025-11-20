@@ -702,6 +702,9 @@ void GiveClientWeapon(int client, int Upgrade = 0)
 	WeaponListRound.GetArray(GiveWeapon, Weplist);
 	RemoveAllWeapons(client);
 	int weapon = Weapons_GiveItem(client, Weplist.InternalWeaponID);
+	if(!IsValidEntity(weapon))
+		return;
+		//idk lol
 	char buffer[36];
 	GetEntityClassname(weapon, buffer, sizeof(buffer));
 	if(TF2_GetClassnameSlot(buffer, weapon) != 2) //no melee  weapon,give deranker
