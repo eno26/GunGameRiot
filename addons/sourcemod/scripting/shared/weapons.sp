@@ -25,6 +25,7 @@ enum struct ItemInfo
 	int WeaponModelIndexOverride;
 	int WeaponForceClass;
 	int Ammo;
+	float Cooldown[3];
 
 	Function FuncAttack;
 	Function FuncAttack2;

@@ -35,7 +35,12 @@ void SDKCall_Setup()
 	g_hSetLocalOrigin = EndPrepSDKCall();
 	if(!g_hSetLocalOrigin)
 		LogError("[Gamedata] Could not find CBaseEntity::SetLocalOrigin");
-
+		
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CBaseEntity::WorldSpaceCenter");
+	PrepSDKCall_SetReturnInfo(SDKType_Vector, SDKPass_ByRef);
+	if ((g_hSDKWorldSpaceCenter = EndPrepSDKCall()) == null) SetFailState("Failed to create SDKCall for CBaseEntity::WorldSpaceCenter offset!");
+	
 	StartPrepSDKCall(SDKCall_Entity);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CBaseEntity::SetLocalAngles");
 	PrepSDKCall_AddParameter(SDKType_Vector, SDKPass_ByRef);
@@ -224,4 +229,9 @@ stock int SDKCall_CTFCreateArrow(float VecOrigin[3], float VecAngles[3], const f
 		return SDKCall(g_hCTFCreateArrow, VecOrigin, VecAngles, fSpeed, fGravity, projectileType, Owner, Scorer);
 	
 	return -1;
+}
+
+stock void WorldSpaceCenter(int entity, float vecPos[3])
+{
+	SDKCall(g_hSDKWorldSpaceCenter, entity, vecPos);
 }

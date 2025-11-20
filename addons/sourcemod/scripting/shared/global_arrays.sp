@@ -15,15 +15,22 @@ Handle g_hSetAbsOrigin;
 Handle g_hStudio_FindAttachment;
 Handle g_hRecalculatePlayerBodygroups;
 Handle SDKSetSpeed;
+Handle g_hCTFCreateArrow;
+Handle g_hSDKWorldSpaceCenter;
 DynamicHook HookItemIterateAttribute;
 Handle g_hImpulse;
 ArrayList RawEntityHooks;
 ConVar sv_cheats;
+ConVar mp_friendlyfire;
+DynamicHook g_DHookRocketExplode; //from mikusch but edited
 int m_bOnlyIterateItemViewAttributes;
 int m_Item;
+bool IsInsideManageRegularWeapons;
+int iref_PropAppliedToRocket[MAXENTITIES];
 
 ConVar tf_scout_air_dash_count;
 
+int h_NpcSolidHookType[MAXENTITIES];
 bool b_IsATrigger[MAXENTITIES];
 bool b_IsATriggerHurt[MAXENTITIES];
 int i_CustomWeaponEquipLogic[MAXENTITIES]={0, ...};
@@ -43,6 +50,11 @@ int WeaponRef_viewmodel[MAXPLAYERS] = {-1, ...};
 int HandRef[MAXPLAYERS] = {-1, ...};
 bool b_IsAMedigun[MAXENTITIES];
 float f_PreventMovementClient[MAXENTITIES];
+bool b_ThisEntityIsAProjectileForUpdateContraints[MAXENTITIES];
+float f_WandDamage[MAXENTITIES]; //
+int i_WandWeapon[MAXENTITIES]; //
+int i_WandParticle[MAXENTITIES]; //Only one allowed, dont use more. ever. ever ever. lag max otherwise.
+int i_WandOwner[MAXENTITIES]; //				//785
 
 int StoreWeapon[MAXENTITIES];
 

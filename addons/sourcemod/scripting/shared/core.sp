@@ -13,6 +13,7 @@
 #include <tf2attributes>
 #include <morecolors>
 #include <tf2utils>
+#include <cbasenpc>
 #include <collisionhook>
 #include <sourcescramble>
 //#include <handledebugger>
@@ -59,11 +60,13 @@
 #include "events.sp"
 #include "sdkhooks.sp"
 #include "convars.sp"
+#include "wand_projectile.sp"
 
 
 #include "weapons/weapon_boom_stick.sp"
 #include "weapons/weapon_fists_of_kahml.sp"
 #include "weapons/weapon_arrow_shot.sp"
+#include "weapons/weapon_default_wand.sp"
 
 public Plugin myinfo =
 {
@@ -83,6 +86,7 @@ public void OnPluginStart()
 	Events_PluginStart();
 	SDKHook_PluginStart();
 	ConVar_PluginStart();
+	WandProjectile_GamedataInit();
 	
 	RegAdminCmd("sm_give_gun", Command_ForceGiveGunName, ADMFLAG_ROOT, "Give a gun to a person");
 	
@@ -109,9 +113,12 @@ public void OnMapStart()
 	PrecacheSound("zombiesurvival/headshot2.wav");
 	PrecacheSound("quake/standard/headshot.mp3");
 
+	Zero(h_NpcSolidHookType);
 	Weapon_Arrow_Shoot_Map_Precache();
 	BoomStick_MapPrecache();
 	KahmlFistMapStart();
+	WandStocks_Map_Precache();
+	Wand_Map_Precache();
 }
 
 public void OnConfigsExecuted()
@@ -152,6 +159,7 @@ public void OnEntityCreated(int entity, const char[] classname)
 	b_IsATrigger[entity] = false;
 	b_IsATriggerHurt[entity] = false;
 	b_IsAMedigun[entity] = false;
+	b_ThisEntityIsAProjectileForUpdateContraints[entity] = false;
 	if(!StrContains(classname, "trigger_teleport")) //npcs think they cant go past this sometimes, lol
 	{
 		b_IsATrigger[entity] = true;
@@ -159,6 +167,11 @@ public void OnEntityCreated(int entity, const char[] classname)
 	else if (!StrContains(classname, "tf_weapon_medigun")) 
 	{
 		b_IsAMedigun[entity] = true;
+	}
+	else if(!StrContains(classname, "tf_projecti"))
+	{
+		//This can only be on red anyways.
+		b_ThisEntityIsAProjectileForUpdateContraints[entity] = true;
 	}
 	else if(!StrContains(classname, "trigger_hurt")) //npcs think they cant go past this sometimes, lol
 	{

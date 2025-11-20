@@ -20,6 +20,7 @@ void ConVar_PluginStart()
 	CvarList = new ArrayList(sizeof(CvarInfo));
 
 	sv_cheats = ConVar_Add("sv_cheats", "0", false, (FCVAR_NOTIFY | FCVAR_REPLICATED | FCVAR_CHEAT));
+	mp_friendlyfire = ConVar_Add("mp_friendlyfire", "0", false, (FCVAR_NOTIFY | FCVAR_REPLICATED | FCVAR_CHEAT));
 	tf_scout_air_dash_count = ConVar_Add("tf_scout_air_dash_count", "0", false); 
 
 	Cvar_GGR_WeaponsTillWin = CreateConVar("ggr_weapons_till_win", "15", "How many kills untill a player wins");
@@ -239,7 +240,7 @@ public void ConVar_OnChanged(ConVar cvar, const char[] oldValue, const char[] ne
 }
 
 
-void Convars_FixClientsideIssues(int client)
+stock void Convars_FixClientsideIssues(int client)
 {
 	SendConVarValue(client, tf_scout_air_dash_count, "1");
 	//set to 1 for a frame...

@@ -6,6 +6,8 @@
 #define FAR_FUTURE	100000000.0
 #define PARTICLE_DISPATCH_FROM_ENTITY		(1<<0)
 #define PARTICLE_DISPATCH_RESET_PARTICLES	(1<<1)
+#define RAD2DEG(%1) ((%1) * (180.0 / FLOAT_PI))
+#define DEG2RAD(%1) ((%1) * FLOAT_PI / 180.0)
 
 #define EF_BONEMERGE			0x001 	// Performs bone merge on client side
 #define	EF_BRIGHTLIGHT 			0x002	// DLIGHT centered at entity origin
@@ -457,26 +459,6 @@ stock void TF2_SetPlayerClass_ZR(int client, TFClassType classType, bool weapons
 	TF2_SetPlayerClass(client, classType, weapons, persistent);
 }
 
-
-
-stock void SetTeam(int entity, int teamSet)
-{
-	if(entity > 0 && entity <= MAXENTITIES)
-	{
-		if(entity <= MaxClients)
-		{
-			ChangeClientTeam(entity, teamSet);
-		}
-		else
-		{
-			SetEntProp(entity, Prop_Data, "m_iTeamNum", teamSet);
-		}
-	}
-	else
-	{
-		SetEntProp(entity, Prop_Data, "m_iTeamNum", teamSet);
-	}
-}
 
 
 stock bool TF2_GetWearable(int client, int &entity)
@@ -968,3 +950,170 @@ stock bool AreVectorsEqual(const float vVec1[3], const float vVec2[3])
 {
 	return (vVec1[0] == vVec2[0] && vVec1[1] == vVec2[1] && vVec1[2] == vVec2[2]);
 } 
+
+
+stock float fixAngle(float angle)
+{
+	int sanity = 0;
+	while (angle < -180.0 && (sanity++) <= 10)
+		angle = angle + 360.0;
+	while (angle > 180.0 && (sanity++) <= 10)
+		angle = angle - 360.0;
+		
+	return angle;
+}
+stock void GetAbsOrigin(int client, float v[3])
+{
+	GetEntPropVector(client, Prop_Data, "m_vecAbsOrigin", v);
+}
+
+
+stock int GetTeam(int entity)
+{
+	return GetEntProp(entity, Prop_Data, "m_iTeamNum");
+}
+
+stock void SetTeam(int entity, int teamSet)
+{
+	if(entity > 0 && entity <= MAXENTITIES)
+	{
+		if(entity <= MaxClients)
+		{
+			ChangeClientTeam(entity, teamSet);
+		}
+		else
+		{
+			SetEntProp(entity, Prop_Data, "m_iTeamNum", teamSet);
+		}
+	}
+	else
+	{
+		SetEntProp(entity, Prop_Data, "m_iTeamNum", teamSet);
+	}
+}
+
+
+stock bool IsValidEnemy(int index, int enemy, bool camoDetection=false, bool target_invul = false)
+{
+	if(enemy <= 0)
+		return false;
+		
+	if(IsValidEntity(enemy))
+	{
+		if(index == enemy)
+		{
+			return false;
+		}
+		if(b_ThisEntityIsAProjectileForUpdateContraints[enemy])
+		{
+			return false;
+		}
+
+		if(enemy <= MaxClients)
+		{
+			
+			if(!mp_friendlyfire.IntValue && GetTeam(index) == GetTeam(enemy))
+			{
+				return false;
+			}
+			else
+			{
+				return IsEntityAlive(enemy, true);
+			}
+		}
+	}
+	return false;
+}
+
+
+stock bool IsEntityAlive(int index, bool WasValidAlready = false)
+{
+	if(WasValidAlready || IsValidEntity(index))
+	{
+		if(index > MaxClients)
+		{
+			return true;
+		}
+		else
+		{
+			if(!IsPlayerAlive(index))
+			{
+				return false;	
+			}
+			else
+			{
+				return true;
+			}
+		}
+	}
+	else
+	{
+		return false;
+	}
+}
+
+
+void MakeObjectIntangeable(int entity)
+{
+	SetEntityCollisionGroup(entity, 0); //Dont Touch Anything.
+	SetEntProp(entity, Prop_Send, "m_usSolidFlags", 12); 
+	SetEntProp(entity, Prop_Data, "m_nSolidType", 0);
+}
+
+stock void CalculateDamageForce( const float vecBulletDir[3], float flScale, float vecForce[3])
+{
+	vecForce = vecBulletDir;
+	NormalizeVector( vecForce, vecForce );
+	ScaleVector(vecForce, FindConVar("phys_pushscale").FloatValue);
+	ScaleVector(vecForce, flScale);
+}
+stock void VectorRotate(float inPoint[3], float angles[3], float outPoint[3])
+{
+	float matRotate[3][4];
+	AngleMatrix(angles, matRotate);
+	VectorRotate2(inPoint, matRotate, outPoint);
+}
+
+stock void VectorRotate2(float in1[3], float in2[3][4], float out[3])
+{
+	out[0] = DotProduct(in1, in2[0]);
+	out[1] = DotProduct(in1, in2[1]);
+	out[2] = DotProduct(in1, in2[2]);
+}
+
+stock void AngleMatrix(float angles[3], float matrix[3][4])
+{
+	float sr = 0.0;
+	float sp = 0.0;
+	float sy = 0.0;
+	float cr = 0.0;
+	float cp = 0.0;
+	float cy = 0.0;
+	sy = Sine(DEG2RAD(angles[1]));
+	cy = Cosine(DEG2RAD(angles[1]));
+	sp = Sine(DEG2RAD(angles[0]));
+	cp = Cosine(DEG2RAD(angles[0]));
+	sr = Sine(DEG2RAD(angles[2]));
+	cr = Cosine(DEG2RAD(angles[2]));
+	matrix[0][0] = cp * cy;
+	matrix[1][0] = cp * sy;
+	matrix[2][0] = -sp;
+	float crcy = cr * cy;
+	float crsy = cr * sy;
+	float srcy = sr * cy;
+	float srsy = sr * sy;
+	matrix[0][1] = sp * srcy - crsy;
+	matrix[1][1] = sp * srsy + crcy;
+	matrix[2][1] = sr * cp;
+	matrix[0][2] = sp * crcy + srsy;
+	matrix[1][2] = sp * crsy - srcy;
+	matrix[2][2] = cr * cp;
+	matrix[0][3] = 0.0;
+	matrix[1][3] = 0.0;
+	matrix[2][3] = 0.0;
+}
+
+stock float DotProduct(float v1[3], float v2[4])
+{
+	return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
+}
