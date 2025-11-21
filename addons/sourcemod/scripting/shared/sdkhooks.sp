@@ -51,6 +51,14 @@ public void OnPostThink(int client)
 		if(ClientAtWhatScore[client] + 1 >= Cvar_GGR_WeaponsTillWin.IntValue)
 			ShowNextWeapon = false;
 
+		if (ClientAssistsThisLevel[client] > 0)
+		{
+			StrCat(buffer, sizeof(buffer), "\nYou'll rank up on the next assist!\nNEXT:");
+		}
+		else
+		{
+			StrCat(buffer, sizeof(buffer), "\n\nNEXT:");
+		}
 		if(ShowNextWeapon)
 		{
 			WeaponInfo Weplist;
@@ -58,10 +66,8 @@ public void OnPostThink(int client)
 			ItemInfo info;
 			WeaponList.GetArray(Weplist.InternalWeaponID, info);
 			
-			Format(buffer, sizeof(buffer), "%s\nNEXT:[%s]", buffer, info.WeaponName);
+			Format(buffer, sizeof(buffer), "%s\n[%s]", buffer, info.WeaponName);
 		}
-		if (ClientAssistsThisLevel[client] > 0)
-			StrCat(buffer, sizeof(buffer), "\nYou'll rank up on the next assist!");
 		
 		ShowSyncHudText(client, SyncHud_GunGame, "%s", buffer);
 	}
