@@ -28,6 +28,7 @@ enum struct SCP18Enum
 	float Position[3];
 	float Velocity[3];
 	int ClientHits[MAXPLAYERS + 1];
+	bool ForceBreak;
 }
 
 // list of all scp 18 entities
@@ -55,35 +56,18 @@ float SCP18Damage;
 float SCP18Volume;
 float SCP18Magnitude;
 int SCP18Pitch;
+bool SCP18Hit;
 
 public Action Timer_SCP18Damage(Handle timer, DataPack pack)
 {
 	pack.Reset();
 	int client = GetClientOfUserId(pack.ReadCell());
 	int entindex = EntRefToEntIndex(pack.ReadCell());
-	if ((entindex > MaxClients) && IsValidClient(client) && IsClientInGame(client) && IsPlayerAlive(client))
+	if (entindex > MaxClients && IsValidClient(client) && IsClientInGame(client) && IsPlayerAlive(client))
 	{
 		int thrower = pack.ReadCell();
 		float damage = pack.ReadFloat();
 		SDKHooks_TakeDamage(client, entindex, thrower, damage, DMG_CLUB);
-		
-		
-		
-		if(!IsEntityAlive(entindex))
-		{
-			int count = SCP18List.Length;
-			for (int i = 0; i < count; i++)
-			{
-				SCP18Enum scp18;
-				SCP18List.GetArray(i, scp18);
-				
-				if(scp18.EntIndex == thrower)
-				{
-					scp18.SpawnTime = scp18.SpawnTime - 1.0;
-					SCP18List.SetArray(i, scp18);
-				}
-			}
-		}
 	}
 
 	return Plugin_Continue;
@@ -109,8 +93,9 @@ public bool SCP18_Trace(int entity, int mask)
 			pack.WriteFloat(SCP18Damage);
 			
 			SCP18Trace.ClientHits[entity] = SCP18Trace.Bounces;
+			SCP18Hit = true;
 			
-			EmitSoundToAll(SCP18ClientHitSound, entity, SNDCHAN_BODY, SNDLEVEL_NORMAL, _, SCP18Volume, SCP18Pitch);	
+			EmitSoundToAll(SCP18ClientHitSound, entity, SNDCHAN_BODY, SNDLEVEL_NORMAL, _, SCP18Volume, SCP18Pitch);
 		}
 	}
 	
@@ -192,7 +177,8 @@ public void SCP18_Tick()
 		}
 		
 		// if we are at max velocity, check if we have exceeded our lifetime
-		if (scp18.Magnitude == SCP18MaxVelocity && ((scp18.SpawnTime + SCP18Lifetime) < time))
+		// (gungame riot) also break here if we dealt too much damage
+		if (scp18.ForceBreak || (scp18.Magnitude == SCP18MaxVelocity && ((scp18.SpawnTime + SCP18Lifetime) < time)))
 		{
 			EmitSoundToAll(SCP18BreakSound, scp18.EntIndex, SNDCHAN_AUTO, SNDLEVEL_NORMAL, _, SNDVOL_NORMAL);
 			CreateTimer(0.1, Timer_RemoveEntity, scp18.EntRef, TIMER_FLAG_NO_MAPCHANGE);
@@ -285,13 +271,18 @@ public void SCP18_Tick()
 			SCP18Damage = SCP18MaxDamage * Ratio;
 			SCP18Volume = LerpValue(Ratio, 0.3, 1.0);
 			SCP18Pitch = RoundFloat(LerpValue(Ratio, 85.0, 115.0));
+			SCP18Hit = false;
 			
 			// redo the trace to damage players, with the possibly truncated end position from the trace before
 			TR_TraceRayFilter(position, hitposition, MASK_SOLID, RayType_EndPoint, SCP18_Trace);
 			
 			// copy over any client hits
 			for (int j = 1; j <= MaxClients; j++)
-				scp18.ClientHits[j] = SCP18Trace.ClientHits[j];				
+				scp18.ClientHits[j] = SCP18Trace.ClientHits[j];
+			
+			// (gungame riot) break because we hit someone too hard
+			if (SCP18Hit && SCP18Damage > 300.0)
+				scp18.ForceBreak = true;
 		}
 		
 		SCP18List.SetArray(i, scp18);
