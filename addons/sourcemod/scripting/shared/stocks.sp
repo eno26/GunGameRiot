@@ -457,6 +457,10 @@ stock void TF2_SetPlayerClass_ZR(int client, TFClassType classType, bool weapons
 	}
 	
 	TF2_SetPlayerClass(client, classType, weapons, persistent);
+	
+	// This updates the player's hitboxes
+	SetVariantString("");
+	AcceptEntityInput(client, "SetCustomModel");
 }
 
 
@@ -1332,4 +1336,19 @@ stock void TE_Particle(const char[] Name, float origin[3]=NULL_VECTOR, float sta
 	{
 		TE_SendToClient(clientspec, delay);
 	}
+}
+
+float GetClientSpeed(int client, bool horizontalOnly = false)
+{
+	float vecClientVel[3];
+	GetEntPropVector(client, Prop_Data, "m_vecVelocity", vecClientVel);
+	
+	float x, y, z;
+	x = vecClientVel[0];
+	y = vecClientVel[1];
+	
+	if (!horizontalOnly)
+		z = vecClientVel[2];
+	
+	return SquareRoot(x*x + y*y + z*z);
 }
