@@ -8,7 +8,7 @@ public void BonkBat_MapStart()
     PrecacheSound(BonkBat_Sound);
 }
 
-// todo might need to add an oncreate, and add some extra netprop and vm stuff?? check bonk.nut
+// todo might need to add an oncreate, and add some extra netprop and vm stuff?? check tf2ware bonk.nut
 
 
 public Action BonkBat_OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
@@ -21,15 +21,34 @@ public Action BonkBat_OnTakeDamage(int victim, int &attacker, int &inflictor, fl
         // SetPropEntity(victim, "m_hGroundEntity", null)
         SetEntPropEnt(victim, Prop_Send, "m_hGroundEntity", null);
         // victim.RemoveFlag(FL_ONGROUND)
-        
+        SetEntProp(victim, Prop_Data, "m_fFlags", (GetEntProp(victim, Prop_Data, "m_fFlags") & ~FL_ONGROUND));
         
         // local scale = 450.0
+        float scale = 450.0
         // local dir = attacker.EyeAngles().Forward()
+        float eyeangles[3], dir[3], vel[3], origin[3];
+        GetClientEyeAngles(attacker, eyeangles);
+        GetAngleVetors(eyeangles, dir, NULL_VECTOR, NULL_VECTOR);
         // local vel = victim.GetAbsVelocity()
+        GetEntPropVector(victim, Prop_Data, "m_vecVelocity", vel); 
         // dir.z = Max(dir.z, 0.0)
+        dir[2] = BonkBat_Max(dir[2], 0.0);
         // vel += dir * scale
+        ScaleVector(dir, scale);
+        AddVector(vel, dir);
         // vel.z += scale
-        // victim.SetAbsVelocity(vel)				
+        vel[2] += scale;
+        // victim.SetAbsVelocity(vel)
+        TeleportEntity(victim, NULL_VECTOR, NULL_VECTOR, vel);				
         // victim.EmitSound(bat_hit_sound)
+        GetClientAbsOrigin(victim, origin);
+        EmitAmbientSound(BonkBat_Sound, origin, victim, 255, _, 1.0, 100, 0.0);
     }
+    
+    return Plugin_Continue;
+}
+
+public float BonkBat_Max(float f1, float f2)
+{
+    return f1 > f2 ? f1 : f2;
 }
