@@ -1384,3 +1384,60 @@ bool IsPointTouchingBox(float pos[3], float mins[3], float maxs[3])
 		
 	return true;
 }
+
+
+bool IsValidMulti(int client, bool checkAlive = true, bool isAlive = true, bool checkTeam = false, int targetTeam = 0)
+{
+	if(client <= 0 || client > MaxClients)
+		return false;
+		
+	if(!IsClientInGame(client))
+		return false;
+		
+	if (checkAlive && IsPlayerAlive(client) != isAlive)
+		return false;
+		
+	if (checkTeam && GetClientTeam(client) != targetTeam)
+		return false;
+		
+	return true;
+}
+
+
+stock TFTeam grabEnemyTeam(int client) //Grabs a client's opposing team and returns it.
+{
+	TFTeam targTeam = TFTeam_Red;
+	
+	if (IsValidClient(client))
+	{
+		TFTeam userTeam = TF2_GetClientTeam(client);
+		
+		if (userTeam == TFTeam_Red)
+		{
+			targTeam = TFTeam_Blue;
+		}
+	}
+	
+	return targTeam;
+}
+
+
+stock void SpawnBeam_Vectors(float StartLoc[3], float EndLoc[3], float beamTiming, int r, int g, int b, int a, int modelIndex, float width=2.0, float endwidth=2.0, int fadelength=1, float amp=15.0, int target = -1)
+{
+	int color[4];
+	color[0] = r;
+	color[1] = g;
+	color[2] = b;
+	color[3] = a;
+	
+	TE_SetupBeamPoints(StartLoc, EndLoc, modelIndex, 0, 0, 0, beamTiming, width, endwidth, fadelength, amp, color, 0);
+	
+	if (!IsValidClient(target))
+	{
+		TE_SendToAll();
+	}
+	else
+	{
+		TE_SendToClient(target);
+	}
+}

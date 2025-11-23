@@ -89,6 +89,7 @@
 #include "weapons/weapon_reverse_rocket.sp"
 #include "weapons/weapon_fartgun.sp"
 #include "weapons/weapon_poisoned_sandvich.sp"
+#include "weapons/weapon_hookshot.sp"
 
 public Plugin myinfo =
 {
@@ -193,6 +194,7 @@ public void OnMapStart()
 	ReverseRocket_Precache();
 	FartGun_Precache();
 	PosionSandvichMapStart();
+	HookshotMapStart();
 }
 public void OnConfigsExecuted()
 {
