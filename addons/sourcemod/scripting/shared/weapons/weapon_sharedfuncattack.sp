@@ -10,7 +10,7 @@ public void SkullcutterCritGive(int client, int weapon, bool crit, int slot)
 public void GiveShieldCharge(int client, int weapon, bool crit, int slot)
 {
 	int wearable = GiveWearable(client, 406, true);
-	Attributes_Set(wearable, 249, 0.3);
-	Attributes_Set(wearable, 248, 10.0);
+	Attributes_Set(wearable, 249, 5.0);
+	Attributes_Set(wearable, 248, 20.0);
 	Attributes_Set(wearable, 246, 0.0);
 }
