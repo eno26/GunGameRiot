@@ -64,6 +64,7 @@
 #include "sdkhooks.sp"
 #include "convars.sp"
 #include "wand_projectile.sp"
+#include "natives.sp"
 
 
 #include "weapons/weapon_boom_stick.sp"
