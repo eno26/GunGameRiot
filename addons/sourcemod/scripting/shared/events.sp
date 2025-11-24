@@ -23,6 +23,15 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 	TF2_SetPlayerClass_ZR(victim, CurrentClass[victim], false, false);
 	//am ded
 	int attacker = GetClientOfUserId(event.GetInt("attacker"));
+	if(b_DiedToFallDamage[victim])
+	{
+		int OverrideAttacker = EntRefToEntIndex(i_FallDamageKillCredit[victim]);
+		if(IsValidClient(OverrideAttacker))
+		{
+			attacker = OverrideAttacker;
+			event.GetInt("attacker", GetClientUserId(attacker));
+		}
+	}
 	int assister = GetClientOfUserId(event.GetInt("assister"));
 
 	bool RankUp = true;
@@ -33,6 +42,9 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 			RankUp = false;
 		}
 	}
+	b_DiedToFallDamage[victim] = false;
+	i_FallDamageKillCredit[victim] = 0;
+	i_WeaponKilledWith[victim] = 0;
 	if(RankUp)
 	{
 		if(IsValidClient(attacker) && attacker != victim && GameRules_GetRoundState() <= RoundState_RoundRunning)
