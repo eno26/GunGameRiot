@@ -20,7 +20,7 @@ public void KamikazeCreate(int client, int weapon)
 		Local_Timer[client] = null;
 	}
 
-	EmitSoundToAll("mvm/sentrybuster/mvm_sentrybuster_intro.wav", client, SNDCHAN_STATIC, 80, _, 0.65);
+	EmitSoundToAll("mvm/sentrybuster/mvm_sentrybuster_intro.wav", client, SNDCHAN_STATIC, 60, _, 0.65);
 	DataPack pack;
 	Local_Timer[client] = CreateDataTimer(0.1, Timer_Local, pack, TIMER_REPEAT);
 	pack.WriteCell(client);
@@ -85,6 +85,8 @@ void Kamikaze_ExplodeMeNow(DataPack pack)
 	static float startPosition[3];
 	WorldSpaceCenter(client, startPosition);
 	f_PreventKillCredit[client] = GetGameTime() + 0.1;
-	TF2_Explode(client, startPosition, 1000.0, 130.0, "hightower_explosion", "common/null.wav");
-	EmitSoundToAll("mvm/mvm_tank_explode.wav", client, SNDCHAN_STATIC, 90, _, 0.8);
+	TF2_Explode(client, startPosition, 1000.0, 130.0, "", "common/null.wav");
+	TE_Particle("hightower_explosion", startPosition, NULL_VECTOR, NULL_VECTOR, -1, _, _, _, _, _, _, _, _, _, 0.0, .clientspec = client);
+	TE_Particle("rd_robot_explosion", startPosition, NULL_VECTOR, NULL_VECTOR, _, _, _, _, _, _, _, _, _, _, 0.0);
+	EmitSoundToAll("mvm/mvm_tank_explode.wav", 0, SNDCHAN_STATIC, 60, _, 0.5,_,_,startPosition);
 }
