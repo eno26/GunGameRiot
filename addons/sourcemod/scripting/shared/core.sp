@@ -206,6 +206,7 @@ public void OnMapStart()
 }
 public void OnConfigsExecuted()
 {
+	ConVar_ConfigsExecuted();
 	ConVar_Enable();
 	Configs_ConfigsExecuted();
 	Weapons_ConfigsExecuted();

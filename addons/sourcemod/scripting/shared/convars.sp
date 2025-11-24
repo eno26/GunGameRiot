@@ -15,7 +15,7 @@ static ArrayList CvarList;
 static ArrayList CvarMapList;
 static bool CvarEnabled;
 
-void ConVar_PluginStart()
+void ConVar_ConfigsExecuted()
 {
 	CvarList = new ArrayList(sizeof(CvarInfo));
 
