@@ -203,6 +203,12 @@ public Action Player_OnTakeDamage(int victim, int &attacker, int &inflictor, flo
 	if(damagetype & DMG_FALL)
 	{
 		damage *= Attributes_Get(victim, Attrib_MultiplyFallDamage, 1.0);
+		int OverrideAttacker = EntRefToEntIndex(i_FallDamageKillCredit[victim]);
+		if(IsValidClient(OverrideAttacker))
+		{
+			attacker = OverrideAttacker;
+		}
+		i_FallDamageKillCredit[victim] = 0;
 	}
 	if (damagecustom == TF_CUSTOM_KART)
 	{

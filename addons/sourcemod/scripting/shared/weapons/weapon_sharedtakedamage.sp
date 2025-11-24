@@ -25,6 +25,7 @@ public Action Timer_SlamVictimDown(Handle timer, any entid)
 	if(!IsEntityAlive(victim))
 		return Plugin_Stop;
 
+	i_FallDamageKillCredit[victim] = EntIndexToEntRef(attacker);
 	TeleportEntity(victim, NULL_VECTOR, NULL_VECTOR, {0.0,0.0, -2000.0});
 	return Plugin_Stop;
 }
