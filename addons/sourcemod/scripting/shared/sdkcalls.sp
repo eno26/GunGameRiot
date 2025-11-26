@@ -4,7 +4,6 @@
 
 static Handle SDKEquipWearable;
 static Handle SDKGetMaxHealth;
-static Handle g_hSetAbsOrigin;
 
 void SDKCall_Setup()
 {

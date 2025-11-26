@@ -50,8 +50,6 @@ char c_WeaponName[MAXPLAYERS][64];
 int i_Hex_WeaponUsesTheseAbilities[MAXENTITIES];
 int i_Viewmodel_PlayerModel[MAXENTITIES] = {-1, ...};
 int i_Worldmodel_WeaponModel[MAXPLAYERS] = {-1, ...};
-int i_PlayerModelOverrideIndexWearable[MAXPLAYERS] = {-1, ...};
-bool b_HideCosmeticsPlayer[MAXPLAYERS];
 int WeaponRef_viewmodel[MAXPLAYERS] = {-1, ...};
 int HandRef[MAXPLAYERS] = {-1, ...};
 bool b_IsAMedigun[MAXENTITIES];

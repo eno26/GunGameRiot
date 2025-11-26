@@ -10,6 +10,8 @@ public void KamikazeMapStart()
 }
 public void KamikazteForceTaunt(int client, int weapon, bool crit, int slot)
 {
+	CurrentClass[client] = TFClass_Soldier;
+	TF2_SetPlayerClass_ZR(client, TFClass_Soldier, _, false);
 	FakeClientCommand(client, "taunt");
 }
 public void KamikazeCreate(int client, int weapon)

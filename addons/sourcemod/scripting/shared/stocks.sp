@@ -1480,3 +1480,10 @@ stock void RunScriptCode(int entity, int activator, int caller, const char[] for
     SetVariantString(buffer);
     AcceptEntityInput(entity, "RunScriptCode", activator, caller);
 }
+
+
+stock void ModelIndexToString(int index, char[] model, int size)
+{
+	int table = FindStringTable("modelprecache");
+	ReadStringTable(table, index, model, size);
+}

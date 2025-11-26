@@ -12,7 +12,7 @@ void WandStocks_Map_Precache()
 stock void WandProjectile_ApplyFunctionToEntity(int projectile, Function Function)
 {
 	func_WandOnTouch[projectile] = Function;
-	ProjectileBaseThinkInternal(Projectile, 3.0);
+	ProjectileBaseThinkInternal(projectile, 3.0);
 }
 
 stock Function func_WandOnTouchReturn(int entity)
@@ -173,7 +173,7 @@ public void ProjectileBaseThink(int Projectile)
 {	
 	ProjectileBaseThinkInternal(Projectile, 1.0);
 }
-public void ProjectileBaseThinkInternal(int Projectile, float Multi = 3.0)
+public void ProjectileBaseThinkInternal(int Projectile, float Multi)
 {	
 	/*
 		Why does this exist?
