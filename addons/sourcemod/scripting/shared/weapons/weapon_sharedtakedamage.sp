@@ -149,3 +149,27 @@ stock void SeabornSoldier_Color(int userid)
 
 }
 	
+
+	
+public Action NoFallDamage_FuncTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	if(attacker != 0)
+	{
+		return Plugin_Continue;
+	}
+	damage *= 10.0;
+	if(damagetype & DMG_FALL)
+	{
+		damage = 100.0;
+	}
+	return Plugin_Continue;
+}
+
+public Action NoSelfDamage_FuncTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	if(attacker == victim)
+	{
+		damage = 0.0;
+	}
+	return Plugin_Continue;
+}

@@ -76,6 +76,7 @@ Function EntityFuncReloadCreate[MAXENTITIES];
 Function EntityFuncRemove[MAXENTITIES];
 Function EntityFuncJarate[MAXENTITIES];
 Function EntityFuncTakeDamage[MAXENTITIES];
+Function EntityFuncTakeDamage_Self[MAXENTITIES];
 Function EntityPlayerCMD[MAXENTITIES];
 TFClassType CurrentClass[MAXPLAYERS]={TFClass_Scout, ...};
 TFClassType WeaponClass[MAXPLAYERS]={TFClass_Scout, ...};

@@ -14,6 +14,19 @@ public void KamikazteForceTaunt(int client, int weapon, bool crit, int slot)
 	TF2_SetPlayerClass_ZR(client, TFClass_Soldier, _, false);
 	FakeClientCommand(client, "taunt");
 }
+public void LaughAndEraseTauntFix(int client, int weapon)
+{
+	RequestFrames(DelayFrame_SetFakeClass,5, GetClientUserId(client));
+}
+
+stock void DelayFrame_SetFakeClass(int userid)
+{
+	int client = GetClientOfUserId(userid);
+	if(!IsValidEntity(client))
+		return;
+
+	CurrentClass[client] = TFClass_Heavy;
+}
 public void KamikazeCreate(int client, int weapon)
 {
 	if (Local_Timer[client] != null)

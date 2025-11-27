@@ -98,6 +98,9 @@ enum struct SpawnPointInfo
 #include "weapons/weapon_poisoned_sandvich.sp"
 #include "weapons/weapon_hookshot.sp"
 #include "weapons/weapon_redeemer.sp"
+#include "weapons/weapon_loud_horn.sp"
+#include "weapons/weapon_supersonicpunch.sp"
+#include "weapons/weapon_laming_rampager.sp"
 
 public Plugin myinfo =
 {
@@ -213,6 +216,9 @@ public void OnMapStart()
 	HookshotMapStart();
 	Spell_MapStart();
 	Redeemer_Precache();
+	LoudHornMapStart();
+	SuperSonic_Precache();
+	LamingRampager_Precache();
 	
 	SpawnPointArray.Clear();
 }

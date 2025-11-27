@@ -1520,3 +1520,27 @@ void Frame_RespawnPlayer(int userid)
 	
 	TF2_RespawnPlayer(client);
 }
+
+
+public void CreateEarthquake(float position[3], float duration, float radius, float amplitude, float frequency)
+{
+	int earthquake = CreateEntityByName("env_shake");
+	if (IsValidEntity(earthquake))
+	{
+	
+		DispatchKeyValueFloat(earthquake, "amplitude", amplitude);
+		DispatchKeyValueFloat(earthquake, "radius", radius * 2);
+		DispatchKeyValueFloat(earthquake, "duration", duration + 1.0);
+		DispatchKeyValueFloat(earthquake, "frequency", frequency);
+
+		SetVariantString("spawnflags 4"); // no physics (physics is 8), affects people in air (4)
+		AcceptEntityInput(earthquake, "AddOutput");
+
+		// create
+		DispatchSpawn(earthquake);
+		TeleportEntity(earthquake, position, NULL_VECTOR, NULL_VECTOR);
+
+		AcceptEntityInput(earthquake, "StartShake", 0);
+		CreateTimer(duration + 0.1, Timer_RemoveEntity, EntIndexToEntRef(earthquake), TIMER_FLAG_NO_MAPCHANGE);
+	}
+}

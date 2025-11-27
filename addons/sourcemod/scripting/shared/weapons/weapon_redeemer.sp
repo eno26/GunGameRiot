@@ -106,6 +106,7 @@ static Action Timer_Local(Handle timer, DataPack pack)
 	f_RetryRespawn[client] = GetGameTime() + 0.5;
 	if(!IsValidEntity(rocket))
 	{
+		PrintCenterText(client, "");
 
 		SetEntProp(client, Prop_Send, "m_bForceLocalPlayerDraw", 0);
 		SetClientViewEntity(client, client);
@@ -119,6 +120,8 @@ static Action Timer_Local(Handle timer, DataPack pack)
 			f_WandDamage[rocket] = 1000.0;
 		float fVel[3];
 
+		PrintCenterText(client, "Control your rocket with your mouse!\nThe more it flies, the more damage it will deal.");
+        SetEntProp(client, Prop_Send, "m_hObserverTarget", -1);
 		GetEntPropVector(rocket, Prop_Data, "m_vInitialVelocity", fVel);
 		float speed = getLinearVelocity(fVel);
 		if(speed < 1500.0)
@@ -200,3 +203,4 @@ public void RedeemerTouch(int entity, int target)
 		RemoveEntity(entity);
 	}
 }
+
