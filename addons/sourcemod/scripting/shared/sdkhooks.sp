@@ -198,11 +198,35 @@ public Action Player_OnTakeDamage(int victim, int &attacker, int &inflictor, flo
 			Call_Finish();
 		}
 	}
+	int weaponActive = GetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon");
+	if(IsValidEntity(weaponActive))
+	{
+		Function func = EntityFuncTakeDamage_Self[weaponActive];
+		if(func && func!=INVALID_FUNCTION)
+		{
+			Call_StartFunction(null, func);
+			Call_PushCell(victim);
+			Call_PushCellRef(attacker);
+			Call_PushCellRef(inflictor);
+			Call_PushFloatRef(damage);
+			Call_PushCellRef(damagetype);
+			Call_PushCellRef(weapon);
+			Call_PushArray(damageForce, sizeof(damageForce));
+			Call_PushArray(damagePosition, sizeof(damagePosition));
+			Call_PushCell(damagecustom);
+			Call_Finish();
+		}
+	}
 
 	i_WeaponKilledWith[victim] = weapon;
 	if(damagetype & DMG_FALL)
 	{
+		b_DiedToFallDamage[victim] = true;
 		damage *= Attributes_Get(victim, Attrib_MultiplyFallDamage, 1.0);
+	}
+	else
+	{
+		b_DiedToFallDamage[victim] = false;
 	}
 	if (damagecustom == TF_CUSTOM_KART)
 	{

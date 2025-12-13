@@ -12,7 +12,7 @@ void WandStocks_Map_Precache()
 stock void WandProjectile_ApplyFunctionToEntity(int projectile, Function Function)
 {
 	func_WandOnTouch[projectile] = Function;
-	ProjectileBaseThink(projectile);
+	ProjectileBaseThinkInternal(projectile, 3.0);
 }
 
 stock Function func_WandOnTouchReturn(int entity)
@@ -25,6 +25,7 @@ void WandProjectile_GamedataInit()
 	CEntityFactory EntityFactory = new CEntityFactory("zr_projectile_base", OnCreate_Proj, OnDestroy_Proj);
 	EntityFactory.DeriveFromClass("prop_dynamic");
 	EntityFactory.BeginDataMapDesc()
+		.DefineVectorField("m_vInitialVelocity", 3)
 	.EndDataMapDesc(); 
 
 	EntityFactory.Install();
@@ -106,9 +107,12 @@ float CustomPos[3] = {0.0,0.0,0.0}) //This will handle just the spawning, the re
 		//Edit: Need owner entity, otheriwse you can actuall hit your own god damn rocket and make a ding sound. (Really annoying.)
 		SetTeam(entity, GetTeam(client));
 		int frame = GetEntProp(entity, Prop_Send, "m_ubInterpolationFrame");
-		TeleportEntity(entity, fPos, fAng, NULL_VECTOR);
+		Custom_SDKCall_SetLocalOrigin(entity, fPos);
+		SDKCall_SetAbsOrigin(entity, fPos);
+		SetEntPropVector(entity, Prop_Data, "m_vInitialVelocity", fVel);
+		Custom_SetAbsVelocity(entity, fVel);	
+		SDKCall_SetAbsAngle(entity, fAng);
 		DispatchSpawn(entity);
-		SetEntPropVector(entity, Prop_Send, "m_angRotation", fAng); //set it so it can be used
 		
 		SetEntPropFloat(entity, Prop_Data, "m_flSimulationTime", GetGameTime());
 		SetEntProp(entity, Prop_Send, "m_ubInterpolationFrame", frame);
@@ -116,11 +120,9 @@ float CustomPos[3] = {0.0,0.0,0.0}) //This will handle just the spawning, the re
 		SetEntityCollisionGroup(entity, 27);
 
 		SetEntityModel(entity, ENERGY_BALL_MODEL);
-		RunScriptCode(entity, -1, -1, "self.SetMoveType(Constants.EMoveType.MOVETYPE_FLY, Constants.EMoveCollide.MOVECOLLIDE_FLY_CUSTOM)");
+		SetEntityMoveType(entity, MOVETYPE_FLY);
+		//RunScriptCode(entity, -1, -1, "self.SetMoveType(Constants.EMoveType.MOVETYPE_FLY, Constants.EMoveCollide.MOVECOLLIDE_FLY_CUSTOM)");
 		Custom_SetAbsVelocity(entity, fVel);	
-
-		//Make it entirely invis. Shouldnt even render these 8 polygons.
-	//	SetEntProp(entity, Prop_Send, "m_fEffects", GetEntProp(entity, Prop_Send, "m_fEffects") &~ EF_NODRAW);
 		
 		if(hideprojectile)
 		{
@@ -158,7 +160,7 @@ float CustomPos[3] = {0.0,0.0,0.0}) //This will handle just the spawning, the re
 		SDKHook(entity, SDKHook_ThinkPost, ProjectileBaseThinkPost);
 		CBaseCombatCharacter(entity).SetNextThink(GetGameTime());
 		b_IsAProjectile[entity] = true;
-		SDKHook(entity, SDKHook_ShouldCollide, Never_ShouldCollide);
+		
 		SDKHook(entity, SDKHook_StartTouch, Wand_Base_StartTouch);
 
 		return entity;
@@ -170,6 +172,10 @@ float CustomPos[3] = {0.0,0.0,0.0}) //This will handle just the spawning, the re
 
 public void ProjectileBaseThink(int Projectile)
 {	
+	ProjectileBaseThinkInternal(Projectile, 1.0);
+}
+public void ProjectileBaseThinkInternal(int Projectile, float Multi)
+{	
 	/*
 		Why does this exist?
 		When using FSOLID_NOT_SOLID | FSOLID_TRIGGER to fix projectiles getting stuck in npcs i.e. setting speed to 0
@@ -180,8 +186,6 @@ public void ProjectileBaseThink(int Projectile)
 
 		This fires a trace ourselves and calls whatever we need.
 	*/
-	if(!IsValidEntity(Projectile))
-		return;
 	ArrayList Projec_HitEntitiesInTheWay = new ArrayList();
 	DataPack packFilter = new DataPack();
 	packFilter.WriteCell(Projec_HitEntitiesInTheWay);
@@ -192,9 +196,9 @@ public void ProjectileBaseThink(int Projectile)
 	static float CurrentVelocity[3];
 	GetEntPropVector(Projectile, Prop_Data, "m_vecAbsVelocity", CurrentVelocity);
 
-	CurrentVelocity[0] *= 0.02;
-	CurrentVelocity[1] *= 0.02;
-	CurrentVelocity[2] *= 0.02;
+	CurrentVelocity[0] *= 0.02 * Multi;
+	CurrentVelocity[1] *= 0.02 * Multi;
+	CurrentVelocity[2] *= 0.02 * Multi;
 
 	static float VecEndLocation[3];
 	VecEndLocation[0] = AbsOrigin[0] + CurrentVelocity[0];
@@ -301,6 +305,10 @@ static void OnDestroy_Proj(CBaseCombatCharacter body)
 	int extra_index = EntRefToEntIndex(iref_PropAppliedToRocket[body.index]);
 	if(IsValidEntity(extra_index))
 		RemoveEntity(extra_index);
+		
+	extra_index = EntRefToEntIndex(i_WandParticle[body.index]);
+	if(IsValidEntity(extra_index))
+		RemoveEntity(extra_index);
 
 	iref_PropAppliedToRocket[body.index] = INVALID_ENT_REFERENCE;
 
@@ -385,9 +393,3 @@ stock int Target_Hit_Wand_Detection(int owner_projectile, int other_entity)
 	}
 	return 0;
 }
-
-
-public bool Never_ShouldCollide(int client, int collisiongroup, int contentsmask, bool originalResult)
-{
-	return false;
-} 

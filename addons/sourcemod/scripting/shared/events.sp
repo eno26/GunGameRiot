@@ -15,6 +15,7 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 	int victim = GetClientOfUserId(event.GetInt("userid"));
 	if(!victim)
 		return Plugin_Continue;
+		
 	CreateTimer(1.0, Timer_Respawn, GetClientUserId(victim));
 	if(f_PreventKillCredit[victim] > GetGameTime())
 	{
@@ -23,6 +24,15 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 	TF2_SetPlayerClass_ZR(victim, CurrentClass[victim], false, false);
 	//am ded
 	int attacker = GetClientOfUserId(event.GetInt("attacker"));
+	if(b_DiedToFallDamage[victim])
+	{
+		int OverrideAttacker = EntRefToEntIndex(i_FallDamageKillCredit[victim]);
+		if(IsValidClient(OverrideAttacker))
+		{
+			attacker = OverrideAttacker;
+			event.GetInt("attacker", GetClientUserId(attacker));
+		}
+	}
 	int assister = GetClientOfUserId(event.GetInt("assister"));
 
 	bool RankUp = true;
@@ -33,6 +43,9 @@ public Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 			RankUp = false;
 		}
 	}
+	b_DiedToFallDamage[victim] = false;
+	i_FallDamageKillCredit[victim] = 0;
+	i_WeaponKilledWith[victim] = 0;
 	if(RankUp)
 	{
 		if(IsValidClient(attacker) && attacker != victim && GameRules_GetRoundState() <= RoundState_RoundRunning)
@@ -119,6 +132,11 @@ public Action Timer_Respawn(Handle timer, any uuid)
 	if(IsPlayerAlive(client))
 		return Plugin_Stop;
 		
+	if(f_RetryRespawn[client] > GetGameTime())
+	{
+		CreateTimer(0.1, Timer_Respawn, GetClientUserId(client));
+		return Plugin_Stop;
+	}
 	int team = GetClientTeam(client);
 	if(team <= 1)
 		return Plugin_Stop;
@@ -133,6 +151,14 @@ public void OnPlayerResupply(Event event, const char[] name, bool dontBroadcast)
 	int client = GetClientOfUserId(userid);
 	if(!client)
 		return;
+	
+	TFTeam team = TF2_GetClientTeam(client);
+	if (n_ForcedTeam >= TFTeam_Red && n_ForcedTeam != team)
+	{
+		// mp_humans_must_join_team kinda sucks, we have to force players to a team ourselves
+		TF2_ForceTeamJoin(client, n_ForcedTeam, true);
+		return;
+	}
 
 	//SetEntProp(client, Prop_Send, "m_iHideHUD", GetEntProp(client, Prop_Send, "m_iHideHUD") | HIDEHUD_BUILDING_STATUS | HIDEHUD_CLOAK_AND_FEIGN);
 	TF2_RemoveAllWeapons(client); //Remove all weapons. No matter what.
@@ -144,14 +170,6 @@ public void OnPlayerResupply(Event event, const char[] name, bool dontBroadcast)
 	ViewChange_UpdateHands(client, CurrentClass[client]);
 	TF2_SetPlayerClass_ZR(client, CurrentClass[client], false, false);
 	
-	if(b_HideCosmeticsPlayer[client])
-	{
-		int entity = MaxClients+1;
-		while(TF2_GetWearable(client, entity))
-		{
-			SetEntProp(entity, Prop_Send, "m_fEffects", GetEntProp(entity, Prop_Send, "m_fEffects") | EF_NODRAW);
-		}
-	}
 
 	
 	int entity = MaxClients+1;
@@ -170,6 +188,9 @@ public void OnPlayerResupply(Event event, const char[] name, bool dontBroadcast)
 	SDKCall_GiveCorrectAmmoCount(client);
 	RequestFrame(GiveWeaponLate, GetClientUserId(client));
 	RequestFrame(Frame_GiveRoundStartConds, GetClientUserId(client));
+	
+	// Don't show name/health of players
+	SetEntProp(client, Prop_Send, "m_iHideHUD", GetEntProp(client, Prop_Send, "m_iHideHUD") | HIDEHUD_TARGET_ID);
 }
 
 stock void GiveWeaponLate(int userid)
@@ -201,6 +222,23 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 {
 	Weapons_ResetRound();
 	
+	// Set all spawnpoints to a specific team if humans can only join one team
+	TFTeam team = TFTeam_Unassigned;
+	char teamName[8];
+	
+	if (mp_humans_must_join_team)
+	{
+		mp_humans_must_join_team.GetString(teamName, sizeof(teamName));
+		
+		if (!StrContains(teamName, "red"))
+			team = TFTeam_Red;
+		else if (!StrContains(teamName, "blu"))
+			team = TFTeam_Blue;
+		
+		RequestFrame(Frame_SetMapSpawnPointsPostTeamSwitch, team);
+	}
+	
+	// Set up spawn über and player collision removal to last up to a certain time, even if players respawn/spawn late
 	const float freezeTime = 5.0;
 	const float extraUberTime = 1.5;
 	
@@ -228,6 +266,7 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 			spawnpoints++;
 	}
 	
+	// Only disable collisions if there are more players than spawnpoints
 	if (clients > spawnpoints)
 	{
 		b_DisableCollisionOnRoundStart = true;

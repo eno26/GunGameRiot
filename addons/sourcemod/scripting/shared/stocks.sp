@@ -108,8 +108,12 @@ enum g_Collision_Group
 	
 };
 
-
-
+// m_lifeState values
+#define LIFE_ALIVE				0 // alive
+#define LIFE_DYING				1 // playing death animation or still falling off of a ledge waiting to hit ground
+#define LIFE_DEAD				2 // dead. lying still.
+#define LIFE_RESPAWNABLE		3
+#define LIFE_DISCARDBODY		4
 
 stock int TF2_GetClassnameSlot(const char[] classname, int entity = -1)
 {
@@ -1479,4 +1483,64 @@ stock void RunScriptCode(int entity, int activator, int caller, const char[] for
     
     SetVariantString(buffer);
     AcceptEntityInput(entity, "RunScriptCode", activator, caller);
+}
+
+
+stock void ModelIndexToString(int index, char[] model, int size)
+{
+	int table = FindStringTable("modelprecache");
+	ReadStringTable(table, index, model, size);
+}
+
+stock float getLinearVelocity(float vecVelocity[3])
+{
+	return SquareRoot((vecVelocity[0] * vecVelocity[0]) + (vecVelocity[1] * vecVelocity[1]) + (vecVelocity[2] * vecVelocity[2]));
+}
+
+void TF2_ForceTeamJoin(int client, TFTeam team, bool respawn)
+{
+	bool alive = IsPlayerAlive(client);
+	if (alive)
+		SetEntProp(client, Prop_Send, "m_lifeState", LIFE_DEAD);
+	
+	TF2_ChangeClientTeam(client, team);
+	
+	if (alive)
+		SetEntProp(client, Prop_Send, "m_lifeState", LIFE_ALIVE);
+	
+	if (respawn)
+		TF2_RespawnPlayer(client);
+}
+
+void Frame_RespawnPlayer(int userid)
+{
+	int client = GetClientOfUserId(userid);
+	if (client <= 0)
+		return;
+	
+	TF2_RespawnPlayer(client);
+}
+
+
+public void CreateEarthquake(float position[3], float duration, float radius, float amplitude, float frequency)
+{
+	int earthquake = CreateEntityByName("env_shake");
+	if (IsValidEntity(earthquake))
+	{
+	
+		DispatchKeyValueFloat(earthquake, "amplitude", amplitude);
+		DispatchKeyValueFloat(earthquake, "radius", radius * 2);
+		DispatchKeyValueFloat(earthquake, "duration", duration + 1.0);
+		DispatchKeyValueFloat(earthquake, "frequency", frequency);
+
+		SetVariantString("spawnflags 4"); // no physics (physics is 8), affects people in air (4)
+		AcceptEntityInput(earthquake, "AddOutput");
+
+		// create
+		DispatchSpawn(earthquake);
+		TeleportEntity(earthquake, position, NULL_VECTOR, NULL_VECTOR);
+
+		AcceptEntityInput(earthquake, "StartShake", 0);
+		CreateTimer(duration + 0.1, Timer_RemoveEntity, EntIndexToEntRef(earthquake), TIMER_FLAG_NO_MAPCHANGE);
+	}
 }
