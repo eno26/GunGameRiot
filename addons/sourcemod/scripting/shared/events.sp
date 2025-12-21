@@ -250,12 +250,17 @@ public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 	
 	for (int client = 1; client <= MaxClients; client++)
 	{
-		if (IsValidClient(client) && IsPlayerAlive(client))
+		if (IsValidClient(client))
 		{
-			clients++;
+			ClientAssistsThisLevel[client] = 0;
 			
-			GiveClientWeapon(client, 0);
-			TF2_AddCondition(client, TFCond_UberchargedCanteen, f_RoundStartUberLastsUntil - gameTime);
+			if (IsPlayerAlive(client))
+			{
+				clients++;
+				
+				GiveClientWeapon(client, 0);
+				TF2_AddCondition(client, TFCond_UberchargedCanteen, f_RoundStartUberLastsUntil - gameTime);
+			}
 		}
 	}
 	
